@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Score Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0070ba;
+            --primary-dark: #00558f;
+            --accent-green: #00c853;
+            --accent-yellow: #ffd600;
+            --accent-red: #ff3d00;
+            --btn-red: #ff5252;
+            --btn-light-red: #ff8a80;
+
+            --bg-light: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: var(--text-dark);
+            line-height: 1.5;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: #64748b;
+        }
+
+        /* --- CALCULATOR GRID --- */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            align-items: start;
+            margin-bottom: 60px;
+        }
+
+        @media (min-width: 1100px) {
+            .calculator-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .controls-panel {
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .control-section {
+            margin-bottom: 30px;
+        }
+
+        .control-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .toggle-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .toggle-group {
+            flex: 1;
+        }
+
+        .control-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .info-icon {
+            color: #0070ba;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border: 1.5px solid #0070ba;
+            border-radius: 50%;
+            font-family: 'Inter', sans-serif;
+            background-color: white;
+            box-shadow: 0 0 0 3px #e0f2fe;
+            margin-left: 6px;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .info-icon:hover {
+            transform: scale(1.05);
+        }
+
+        [data-tooltip] {
+            position: relative;
+            cursor: pointer;
+        }
+
+        [data-tooltip]:hover::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translate(-50%, -10px);
+            background: #1e293b;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-width: 220px;
+            width: max-content;
+            z-index: 50;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        [data-tooltip]:hover::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translate(-50%, -4px);
+            border: 6px solid transparent;
+            border-top-color: #1e293b;
+            z-index: 50;
+        }
+
+        .pill-container {
+            display: flex;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 48px;
+        }
+
+        .pill-btn {
+            flex: 1;
+            border: none;
+            background: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            border-right: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .pill-btn:last-child {
+            border-right: none;
+        }
+
+        .pill-btn.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .custom-select {
+            width: 100%;
+            height: 48px;
+            padding: 0 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #1e293b;
+            appearance: none;
+            background: #fff url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 16px center;
+            background-size: 16px;
+        }
+
+        .input-row {
+            margin-bottom: 28px;
+        }
+
+        .slider-input-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .range-slider {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid var(--primary-blue);
+            box-shadow: 0 0 0 4px #e0f2fe;
+            /* Halo effect */
+            margin-top: -9px;
+            /* Centering */
+            transition: transform 0.1s;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.05);
+        }
+
+        .number-control {
+            width: 140px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #fff;
+            padding: 2px;
+        }
+
+        .currency-symbol {
+            padding-left: 10px;
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .number-input {
+            flex: 1;
+            border: none;
+            text-align: left;
+            padding-left: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            min-width: 0;
+            outline: none;
+        }
+
+        .stepper-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 2px;
+            line-height: 1;
+        }
+
+        .stepper-btn:hover {
+            background: #f1f5f9;
+            color: var(--primary-blue);
+            border-color: #cbd5e1;
+        }
+
+        .results-panel {
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            min-height: 400px;
+        }
+
+        .results-header-text h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #1e293b;
+        }
+
+        .results-header-text p {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .feedback-list {
+            margin-bottom: 20px;
+            padding-left: 20px;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .feedback-list li {
+            margin-bottom: 6px;
+        }
+
+        .score-box {
+            background-color: var(--accent-yellow);
+            color: white;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .score-sub {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .gauge-wrapper {
+            position: relative;
+            width: 260px;
+            height: 140px;
+            margin: 0 auto 24px auto;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--primary-blue);
+            color: white;
+            padding: 16px 12px;
+            border-radius: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 90px;
+        }
+
+        .kpi-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .kpi-val {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .bg-green {
+            background-color: var(--accent-green) !important;
+        }
+
+        .bg-yellow {
+            background-color: var(--accent-yellow) !important;
+        }
+
+        .bg-red {
+            background-color: var(--accent-red) !important;
+        }
+
+        .breakdown-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .breakdown-section h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.85rem;
+            color: #334155;
+        }
+
+        .breakdown-row:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            color: #0f172a;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 4px;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 110px;
+        }
+
+        .btn-start {
+            background-color: var(--btn-red);
+        }
+
+        .btn-call {
+            background-color: var(--btn-light-red);
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* --- GUIDE SECTION --- */
+        .guide-wrapper {
+            margin-top: 80px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 60px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .guide-title-block {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .guide-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .guide-subtitle {
+            font-size: 1.1rem;
+            color: #0070ba;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .guide-section {
+            margin-bottom: 60px;
+        }
+
+        .guide-h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .guide-h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 30px 0 16px;
+        }
+
+        .guide-p {
+            font-size: 1.05rem;
+            color: #334155;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .guide-ul {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+
+        .guide-li {
+            font-size: 1.05rem;
+            color: #334155;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .guide-li::before {
+            content: "•";
+            color: #0070ba;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .checklist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .checklist-q {
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .checklist-a {
+            font-weight: 700;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* Traffic Lights */
+        .light-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border-left: 5px solid;
+        }
+
+        .light-green {
+            background: #f0fdf4;
+            border-color: #22c55e;
+        }
+
+        .light-yellow {
+            background: #fefce8;
+            border-color: #eab308;
+        }
+
+        .light-red {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+
+        .light-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .example-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .ex-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 0;
+        }
+
+        .ex-row strong {
+            color: #1e293b;
+        }
+
+        .faq-item {
+            margin-bottom: 24px;
+        }
+
+        .faq-q {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .faq-a {
+            color: #475569;
+        }
+
+        .cta-box {
+            background: #1e293b;
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .cta-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: var(--btn-red);
+            color: white;
+            font-weight: 700;
+            padding: 16px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: opacity 0.2s;
+        }
+
+        .cta-btn:hover {
+            opacity: 0.9;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="page-header">
+            <h1>Mortgage Score Calculator</h1>
+            <p>Update the sections to get live results on your purchase and mortgage options</p>
+        </div>
+
+        <div class="calculator-grid">
+            <!-- CONTROLS SIDE -->
+            <div class="controls-panel">
+                <div class="control-section">
+                    <div class="toggle-row">
+                        <div class="toggle-group">
+                            <div class="control-label">Residency <span class="info-icon"
+                                    data-tooltip="Residents usually get up to 80% LTV. Non residents around 70%.">i</span>
+                            </div>
+                            <div class="pill-container">
+                                <button class="pill-btn" data-group="residency"
+                                    data-value="non-resident">Non-resident</button>
+                                <button class="pill-btn active" data-group="residency"
+                                    data-value="resident">Resident</button>
+                            </div>
+                        </div>
+                        <div class="toggle-group">
+                            <div class="control-label">Property type <span class="info-icon"
+                                    data-tooltip="Resale: ITP. New build: VAT/IGIC + AJD.">i</span></div>
+                            <div class="pill-container">
+                                <button class="pill-btn active" data-group="propType"
+                                    data-value="resale">Resale</button>
+                                <button class="pill-btn" data-group="propType" data-value="new-build">New-build</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-label">Region <span class="info-icon"
+                            data-tooltip="Taxes/fees vary by autonomous community.">i</span></div>
+                    <div style="position:relative;"><select id="region" class="custom-select"></select></div>
+                </div>
+
+                <div class="control-section">
+                    <div class="input-row">
+                        <div class="control-label">Property price <span class="info-icon"
+                                data-tooltip="Agreed purchase price.">i</span></div>
+                        <div class="slider-input-container">
+                            <input type="range" id="price-slider" class="range-slider" min="50000" max="3000000"
+                                step="5000">
+                            <div class="number-control"><span class="currency-symbol">€</span><input type="text"
+                                    id="price-input" class="number-input"><button class="stepper-btn"
+                                    onclick="step('price', -5000)">-</button><button class="stepper-btn"
+                                    onclick="step('price', 5000)">+</button></div>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="control-label">Mortgage amount <span class="info-icon"
+                                data-tooltip="Loan amount requested.">i</span></div>
+                        <div class="slider-input-container">
+                            <input type="range" id="mortgage-slider" class="range-slider" min="0" max="3000000"
+                                step="5000">
+                            <div class="number-control"><span class="currency-symbol">€</span><input type="text"
+                                    id="mortgage-input" class="number-input"><button class="stepper-btn"
+                                    onclick="step('mortgage', -5000)">-</button><button class="stepper-btn"
+                                    onclick="step('mortgage', 5000)">+</button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <div class="input-row">
+                        <div class="control-label">Net household Income <span class="info-icon"
+                                data-tooltip="After-tax monthly income for all borrowers.">i</span></div>
+                        <div class="slider-input-container">
+                            <input type="range" id="income-slider" class="range-slider" min="1000" max="30000"
+                                step="100">
+                            <div class="number-control"><span class="currency-symbol">€</span><input type="text"
+                                    id="income-input" class="number-input"><button class="stepper-btn"
+                                    onclick="step('income', -100)">-</button><button class="stepper-btn"
+                                    onclick="step('income', 100)">+</button></div>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="control-label">Existing loan/credit payments <span class="info-icon"
+                                data-tooltip="Other monthly debt payments.">i</span></div>
+                        <div class="slider-input-container">
+                            <input type="range" id="debts-slider" class="range-slider" min="0" max="10000" step="50">
+                            <div class="number-control"><span class="currency-symbol">€</span><input type="text"
+                                    id="debts-input" class="number-input"><button class="stepper-btn"
+                                    onclick="step('debts', -50)">-</button><button class="stepper-btn"
+                                    onclick="step('debts', 50)">+</button></div>
+                        </div>
+                    </div>
+                    <div class="input-row" style="display:flex; gap:20px;">
+                        <div style="flex:1">
+                            <div class="control-label">Age <span class="info-icon"
+                                    data-tooltip="We cap the term so mortgage ends by age 75.">i</span></div>
+                            <div class="slider-input-container">
+                                <input type="range" id="age-slider" class="range-slider" min="18" max="75">
+                                <div class="number-control">
+                                    <input type="text" id="age-input" class="number-input">
+                                    <button class="stepper-btn" onclick="step('age', -1)">-</button>
+                                    <button class="stepper-btn" onclick="step('age', 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex:1">
+                            <div class="control-label">Term (years) <span id="term-hint"
+                                    style="font-size:0.8em; color:#64748b;">max (35y)</span> <span class="info-icon"
+                                    data-tooltip="Shorter term = higher payment.">i</span></div>
+                            <div class="slider-input-container">
+                                <input type="range" id="term-slider" class="range-slider" min="5" max="40">
+                                <div class="number-control">
+                                    <input type="text" id="term-input" class="number-input">
+                                    <button class="stepper-btn" onclick="step('term', -1)">-</button>
+                                    <button class="stepper-btn" onclick="step('term', 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="control-label">Interest rate (annual %) <span class="info-icon"
+                                data-tooltip="Annual rate.">i</span></div>
+                        <div class="slider-input-container">
+                            <input type="range" id="rate-slider" class="range-slider" min="0.5" max="10.0" step="0.1">
+                            <div class="number-control" style="width:140px;">
+                                <input type="text" id="rate-input" class="number-input">
+                                <button class="stepper-btn" onclick="step('rate', -0.1)">-</button>
+                                <button class="stepper-btn" onclick="step('rate', 0.1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESULTS SIDE -->
+            <div class="results-panel">
+                <!-- Hidden Score Section -->
+                <div id="score-results" class="hidden">
+                    <div class="results-header-text">
+                        <h2>Your results</h2>
+                        <p id="score-text">Your score is 0.</p>
+                        <ul id="feedback-list" class="feedback-list"></ul>
+                    </div>
+                    <div class="score-gauge-container">
+                        <div id="score-box-el" class="score-box bg-red">
+                            <div class="score-sub" id="score-quality">Very poor</div>
+                            <div id="score-val-text">0 / 100</div>
+                        </div>
+                        <div class="gauge-wrapper">
+                            <svg viewBox="0 0 260 140" style="width:100%; height:100%; overflow:visible;">
+                                <path d="M 20 140 A 110 110 0 0 1 54 55" stroke="#ff3d00" stroke-width="24" fill="none"
+                                    stroke-linecap="round" />
+                                <path d="M 54 55 A 110 110 0 0 1 130 30" stroke="#ffab00" stroke-width="24"
+                                    fill="none" />
+                                <path d="M 130 30 A 110 110 0 0 1 206 55" stroke="#ffd600" stroke-width="24"
+                                    fill="none" />
+                                <path d="M 206 55 A 110 110 0 0 1 240 140" stroke="#00c853" stroke-width="24"
+                                    fill="none" stroke-linecap="round" />
+                                <path id="gauge-progress" d="M 20 140 A 110 110 0 0 1 240 140" stroke="#0070ba"
+                                    stroke-width="12" fill="none" stroke-linecap="round"
+                                    style="stroke-dasharray: 345; stroke-dashoffset: 345; transition: stroke-dashoffset 0.8s ease;" />
+                                <g id="needle"
+                                    style="transform-origin: 130px 140px; transform: rotate(-90deg); transition: transform 0.8s ease;">
+                                    <circle cx="130" cy="140" r="24" fill="#e0f2fe" opacity="0.6" />
+                                    <circle cx="130" cy="140" r="16" fill="#fff" />
+                                    <circle cx="130" cy="140" r="8" fill="#0070ba" />
+                                    <line x1="130" y1="140" x2="130" y2="30" stroke="#0070ba" stroke-width="5"
+                                        stroke-linecap="round" />
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Always visible KPI Grid -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-title">Monthly payments</div>
+                        <div class="kpi-val" id="val-monthly">€0</div>
+                    </div>
+                    <div class="kpi-card bg-green" id="card-dti">
+                        <div class="kpi-title">Debt-to-Income (DTI)</div>
+                        <div class="kpi-val" id="val-dti">0%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Deposit required</div>
+                        <div class="kpi-val" id="val-deposit">€0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Loan-to-Value (LTV)</div>
+                        <div class="kpi-val" id="val-ltv">0%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Taxes & Costs</div>
+                        <div class="kpi-val" id="val-taxes">€0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Total Interest</div>
+                        <div class="kpi-val" id="val-interest">€0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Total Cash Required</div>
+                        <div class="kpi-val" id="val-cash">€0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Total Repayable</div>
+                        <div class="kpi-val" id="val-repay">€0</div>
+                    </div>
+                </div>
+
+                <!-- Hidden Breakdown (revealed on change) -->
+                <div class="breakdown-section hidden" id="breakdown-results">
+                    <h3>Purchase cost breakdown</h3>
+                    <div id="breakdown-list" class="breakdown-list"></div>
+                </div>
+
+                <!-- Always visible Actions -->
+                <div class="action-row">
+                    <button class="action-btn btn-start">Get started</button>
+                    <button class="action-btn btn-call">Book a call</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUIDE CONTENT SECTION -->
+
+
+        <!-- INFO SECTION (How it works / Controls) -->
+        <div class="info-wrapper"
+            style="max-width: 1100px; margin: 80px auto 0; padding-top: 60px; border-top: 1px solid #e2e8f0;">
+            <style>
+                .info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 60px;
+                }
+
+                @media(max-width:768px) {
+                    .info-grid {
+                        grid-template-columns: 1fr;
+                        gap: 40px;
+                    }
+                }
+
+                .info-h2 {
+                    font-size: 2rem;
+                    font-weight: 800;
+                    color: #0f172a;
+                    margin-bottom: 24px;
+                }
+
+                .info-p {
+                    font-size: 1rem;
+                    color: #475569;
+                    line-height: 1.6;
+                    margin-bottom: 16px;
+                }
+
+                .red-box {
+                    background-color: #fca5a5;
+                    /* Fallback */
+                    background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+                    color: white;
+                    padding: 32px;
+                    border-radius: 20px;
+                    margin-top: 32px;
+                    box-shadow: 0 10px 25px -5px rgba(255, 82, 82, 0.4);
+                }
+
+                .red-box h3 {
+                    font-size: 1.4rem;
+                    font-weight: 800;
+                    margin-bottom: 16px;
+                    color: white;
+                }
+
+                .red-box p {
+                    font-size: 1rem;
+                    line-height: 1.6;
+                    margin-bottom: 16px;
+                    opacity: 0.95;
+                }
+
+                .red-box p:last-child {
+                    margin-bottom: 0;
+                }
+
+                .red-box strong {
+                    font-weight: 800;
+                    color: white;
+                    text-decoration: underline;
+                    text-decoration-thickness: 2px;
+                }
+
+                .control-item {
+                    margin-bottom: 24px;
+                }
+
+                .control-title {
+                    font-size: 1rem;
+                    font-weight: 700;
+                    color: #0f172a;
+                    margin-bottom: 6px;
+                }
+
+                .control-desc {
+                    font-size: 0.95rem;
+                    color: #475569;
+                    line-height: 1.5;
+                }
+            </style>
+
+            <div class="info-grid">
+                <!-- How does it work -->
+                <div class="info-col">
+                    <h2 class="info-h2">How does it work</h2>
+                    <p class="info-p">The way banks score you is different in every country.</p>
+                    <p class="info-p">In Spain, banks look at your taxed income, and how much debt you manage.</p>
+                    <p class="info-p">Our calculator takes these figures into account and gives you an accurate
+                        score out of 100.</p>
+
+                    <div class="red-box">
+                        <h3>Accurate scoring system</h3>
+                        <p>Our scoring system takes into account all the relevant figures and produces an accurate %
+                            score based on how the banks will score you.</p>
+                        <p>If your score is <strong>above 60%</strong> then there is a very good chance <strong>you
+                                will qualify</strong>, the higher the score the better your chance to qualify.</p>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="info-col">
+                    <h2 class="info-h2">Controls</h2>
+
+                    <div class="control-item">
+                        <div class="control-title">Monthly Income</div>
+                        <div class="control-desc">Your total income each month after tax. If you are buying with
+                            another person, you can combine these figures.</div>
+                    </div>
+
+                    <div class="control-item">
+                        <div class="control-title">Monthly Debt</div>
+                        <div class="control-desc">Mortgage payments, car loans, credit card bills. Add up how much
+                            you pay in total each month to maintain these debts.</div>
+                    </div>
+
+                    <div class="control-item">
+                        <div class="control-title">Loan Amount</div>
+                        <div class="control-desc">The maximum LTV (loan to value) you can borrow is 70% if you are a
+                            non-tax resident. So the loan figure assumes this total value.</div>
+                    </div>
+
+                    <div class="control-item">
+                        <div class="control-title">Taxes & Costs</div>
+                        <div class="control-desc">This is based on where you purchase, local taxes plus other
+                            relevant purchase costs.</div>
+                    </div>
+
+                    <div class="control-item">
+                        <div class="control-title">Mortgage Term</div>
+                        <div class="control-desc">The normal term of a loan in Spain is between 10-35 years.
+                            Regardless your mortgage term must complete before you are 75 years of age.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    </div>
+
+    <script>
+        const REGIONS = { madrid: { name: 'Madrid', itp: [{ l: Infinity, r: 0.06 }], ajd: 0.0075 }, andalusia: { name: 'Andalusia', itp: [{ l: Infinity, r: 0.07 }], ajd: 0.012 }, aragon: { name: 'Aragón', itp: [{ l: Infinity, r: 0.08 }], ajd: 0.015 }, asturias: { name: 'Asturias', itp: [{ l: Infinity, r: 0.08 }], ajd: 0.012 }, balearic: { name: 'Balearic Islands', itp: [{ l: 400000, r: 0.08 }, { l: 600000, r: 0.09 }, { l: 1000000, r: 0.10 }, { l: Infinity, r: 0.13 }], ajd: 0.015 }, canary: { name: 'Canary Islands', itp: [{ l: Infinity, r: 0.065 }], ajd: 0.0075 }, cantabria: { name: 'Cantabria', itp: [{ l: Infinity, r: 0.09 }], ajd: 0.015 }, castilla_lm: { name: 'Castilla-La Mancha', itp: [{ l: Infinity, r: 0.09 }], ajd: 0.015 }, castilla_yl: { name: 'Castilla y León', itp: [{ l: Infinity, r: 0.08 }], ajd: 0.015 }, catalonia: { name: 'Catalonia', itp: [{ l: 1000000, r: 0.10 }, { l: Infinity, r: 0.11 }], ajd: 0.015 }, valencia: { name: 'Valencian Community', itp: [{ l: 1000000, r: 0.10 }, { l: Infinity, r: 0.11 }], ajd: 0.015 }, extremadura: { name: 'Extremadura', itp: [{ l: 360000, r: 0.08 }, { l: 600000, r: 0.10 }, { l: Infinity, r: 0.11 }], ajd: 0.015 }, galicia: { name: 'Galicia', itp: [{ l: Infinity, r: 0.08 }], ajd: 0.015 }, rioja: { name: 'La Rioja', itp: [{ l: Infinity, r: 0.07 }], ajd: 0.01 }, murcia: { name: 'Region of Murcia', itp: [{ l: Infinity, r: 0.08 }], ajd: 0.015 }, navarra: { name: 'Navarra', itp: [{ l: Infinity, r: 0.06 }], ajd: 0.005 }, basque: { name: 'Basque Country', itp: [{ l: Infinity, r: 0.04 }], ajd: 0.005 } };
+        const state = { touched: false, residency: 'non-resident', propType: 'resale', region: 'madrid', price: 300000, mortgage: 210000, income: 6000, debts: 200, age: 40, term: 25, rate: 3.5 };
+        const fmtMoney = n => Number(n).toLocaleString('en-EU', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+        const parse = v => Number(String(v).replace(/[^0-9.]/g, ''));
+        const rSelect = document.getElementById('region');
+        Object.keys(REGIONS).forEach(k => { const opt = document.createElement('option'); opt.value = k; opt.innerText = REGIONS[k].name; rSelect.appendChild(opt); });
+
+        function init() {
+            document.querySelectorAll('.pill-btn').forEach(b => {
+                b.addEventListener('click', e => {
+                    const g = e.target.dataset.group;
+                    document.querySelectorAll(`.pill-btn[data-group="${g}"]`).forEach(x => x.classList.remove('active'));
+                    e.target.classList.add('active'); state[g] = e.target.dataset.value; interact();
+                });
+            });
+            rSelect.addEventListener('change', e => { state.region = e.target.value; interact(); });
+            const bind = (key) => {
+                const sl = document.getElementById(key + '-slider'); const inp = document.getElementById(key + '-input');
+                if (!sl || !inp) return;
+                sl.addEventListener('input', e => { state[key] = Number(e.target.value); updateUI_Inputs(); interact(); });
+                inp.addEventListener('change', e => { state[key] = parse(e.target.value); updateUI_Inputs(); interact(); });
+            };
+            ['price', 'mortgage', 'income', 'debts', 'age', 'term', 'rate'].forEach(bind);
+
+            const updateHint = () => {
+                document.getElementById('term-hint').textContent = `max updates by age (${75 - state.age}y)`;
+            };
+            document.getElementById('age-slider').addEventListener('input', updateHint);
+            document.getElementById('age-input').addEventListener('change', updateHint);
+
+            updateUI_Inputs();
+        }
+
+        function step(key, d) {
+            state[key] += d;
+            const sl = document.getElementById(key + '-slider');
+            if (state[key] < Number(sl.min)) state[key] = Number(sl.min);
+            if (state[key] > Number(sl.max)) state[key] = Number(sl.max);
+            if (key === 'rate') state[key] = Math.round(state[key] * 10) / 10;
+            updateUI_Inputs(); interact();
+        }
+
+        function updateUI_Inputs() {
+            const sync = (key) => {
+                const sl = document.getElementById(key + '-slider'); const inp = document.getElementById(key + '-input');
+                if (!sl || !inp) return;
+                sl.value = state[key];
+                if (key === 'rate') inp.value = state[key];
+                else if (key === 'age' || key === 'term') inp.value = state[key];
+                else inp.value = state[key].toLocaleString();
+
+                const pct = (state[key] - sl.min) / (sl.max - sl.min) * 100;
+                sl.style.background = `linear-gradient(to right, #0070ba ${pct}%, #e2e8f0 ${pct}%)`;
+            };
+            ['price', 'mortgage', 'income', 'debts', 'age', 'term', 'rate'].forEach(sync);
+            document.getElementById('term-hint').textContent = `max updates by age (${75 - state.age}y)`;
+        }
+
+        function interact() {
+            if (!state.touched) {
+                state.touched = true;
+                document.getElementById('score-results').classList.remove('hidden');
+                document.getElementById('breakdown-results').classList.remove('hidden');
+                document.getElementById('score-results').classList.add('fade-in');
+                document.getElementById('breakdown-results').classList.add('fade-in');
+            }
+            calculate();
+        }
+
+        function calculate() {
+            const { price, mortgage, income, debts, term, rate, region, propType, residency } = state;
+            const regInfo = REGIONS[region];
+            const i = (rate / 100) / 12; const n = term * 12;
+            let monthly = 0; let totalRepay = 0;
+            if (mortgage > 0) {
+                if (rate === 0) monthly = mortgage / n;
+                else monthly = mortgage * ((i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1));
+                totalRepay = monthly * n;
+            }
+            const totalInt = totalRepay - mortgage;
+            let dti = 0; if (income > 0) dti = Math.round(((monthly + debts) / income) * 100);
+            let tax = 0; let taxLabel = '';
+            if (propType === 'new-build') {
+                tax = price * (0.10 + regInfo.ajd); taxLabel = `IVA 10% + AJD ${(regInfo.ajd * 100).toFixed(1)}%`;
+            } else {
+                if (regInfo.itp.length === 1) { tax = price * regInfo.itp[0].r; taxLabel = `ITP ${(regInfo.itp[0].r * 100).toFixed(0)}%`; }
+                else {
+                    let rem = price; let prevL = 0; let wTotal = 0;
+                    regInfo.itp.forEach(band => { if (price > prevL) { const w = Math.min(price, band.l) - prevL; wTotal += w * band.r; prevL = band.l; } });
+                    tax = wTotal; taxLabel = `ITP (Variable)`;
+                }
+            }
+            const notary = 600 + (price * 0.001); const registry = notary * 0.65; const legal = price * 0.01; const gestoria = 400; const valuation = 450; const mortgageCosts = mortgage * 0.005;
+            const totalCosts = tax + notary + registry + legal + gestoria + valuation + mortgageCosts;
+            const downpayment = Math.max(0, price - mortgage); const cashRequired = downpayment + totalCosts;
+            const ltv = Math.round((mortgage / price) * 100);
+            let score = 100; const dtiLim = 35; if (dti > dtiLim) score -= (dti - dtiLim) * 4;
+            const ltvLim = residency === 'resident' ? 80 : 70; if (ltv > ltvLim) score -= (ltv - ltvLim) * 5;
+            if ((income - (monthly + debts)) < 1000) score -= 20;
+            if ((state.age + term) > 75) score -= 50;
+            if (score < 0) score = 0; if (score > 100) score = 100;
+
+            document.getElementById('val-monthly').innerText = fmtMoney(monthly);
+            document.getElementById('val-dti').innerText = dti + '%';
+            document.getElementById('val-deposit').innerText = fmtMoney(downpayment);
+            document.getElementById('val-ltv').innerText = ltv + '%';
+            document.getElementById('val-taxes').innerText = fmtMoney(totalCosts);
+            document.getElementById('val-interest').innerText = fmtMoney(totalInt);
+            document.getElementById('val-cash').innerText = fmtMoney(cashRequired);
+            document.getElementById('val-repay').innerText = fmtMoney(totalRepay);
+
+            const scEl = document.getElementById('score-box-el');
+            let qual = 'Very poor'; let cls = 'bg-red';
+            if (score >= 80) { qual = 'Excellent'; cls = 'bg-green'; } else if (score >= 60) { qual = 'Good'; cls = 'bg-yellow'; } else if (score >= 40) { qual = 'Average'; cls = 'bg-yellow'; }
+            scEl.className = 'score-box ' + cls;
+            document.getElementById('score-quality').innerText = qual;
+            document.getElementById('score-val-text').innerText = Math.round(score) + ' / 100';
+
+            const fbList = document.getElementById('feedback-list'); fbList.innerHTML = '';
+            const scText = document.getElementById('score-text');
+            if (score < 60) scText.innerText = `Your score is ${Math.round(score)} — unlikely to qualify without changes.`;
+            else if (score < 80) scText.innerText = `Your score is ${Math.round(score)} — good chance of qualifying.`;
+            else scText.innerText = `Your score is ${Math.round(score)} — excellent chance of qualifying!`;
+
+            if (dti > 40) { const li = document.createElement('li'); li.innerText = `DTI is ${dti}% (guideline 35-40%).`; fbList.appendChild(li); }
+            if (ltv > ltvLim) { const li = document.createElement('li'); li.innerText = `LTV is ${ltv}% (limit ${ltvLim}%). Reduce mortgage.`; fbList.appendChild(li); }
+            if ((state.age + term) > 75) { const li = document.createElement('li'); li.innerText = `Mortgage ends after age 75. Reduce term.`; fbList.appendChild(li); }
+            if (score < 100 && fbList.children.length === 0) { const li = document.createElement('li'); li.innerText = "Increase income or add applicant to improve score."; fbList.appendChild(li); }
+
+            const dtiCard = document.getElementById('card-dti');
+            if (dti > 40) dtiCard.className = 'kpi-card bg-red'; else if (dti > 30) dtiCard.className = 'kpi-card bg-yellow'; else dtiCard.className = 'kpi-card bg-green';
+
+            const maxLen = 345; const off = maxLen - ((score / 100) * maxLen);
+            document.getElementById('gauge-progress').style.strokeDashoffset = off;
+            document.getElementById('needle').style.transform = `rotate(${-90 + (score / 100) * 180}deg)`;
+
+            const bdList = document.getElementById('breakdown-list');
+            bdList.innerHTML = `<div class="breakdown-row"><span>${taxLabel}</span><span>${fmtMoney(tax)}</span></div>
+        <div class="breakdown-row"><span>Notary (escritura)</span><span>${fmtMoney(notary)}</span></div>
+        <div class="breakdown-row"><span>Land Registry</span><span>${fmtMoney(registry)}</span></div>
+        <div class="breakdown-row"><span>Legal costs</span><span>${fmtMoney(legal)}</span></div>
+        <div class="breakdown-row"><span>Gestoria / Admin</span><span>${fmtMoney(gestoria)}</span></div>
+        <div class="breakdown-row"><span>Valuation (tasación)</span><span>${fmtMoney(valuation)}</span></div>
+        <div class="breakdown-row"><span>Mortgage costs</span><span>${fmtMoney(mortgageCosts)}</span></div>
+        <div class="breakdown-row"><span>Total taxes & costs</span><span>${fmtMoney(totalCosts)}</span></div>`;
+        }
+        init();
+    </script>
+</body>
+
+</html>
