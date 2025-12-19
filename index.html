@@ -698,12 +698,214 @@
                 transform: translateY(0);
             }
         }
+
+        /* HERO SECTION */
+        .hero-wrapper {
+            background-color: #1e3a52;
+            color: white;
+            padding: 60px 50px;
+            border-radius: 24px;
+            margin-bottom: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-content {
+            flex: 1;
+            max-width: 600px;
+            padding-right: 20px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            opacity: 0.9;
+            margin-bottom: 32px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .hero-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 480px;
+            flex-shrink: 0;
+            color: #0f172a;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .hero-card p {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+        }
+
+        .hero-input-group {
+            margin-bottom: 24px;
+        }
+
+        .hero-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        .hero-input {
+            width: 100%;
+            padding: 16px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            color: #1e293b;
+            background-color: #f8fafc;
+        }
+
+        .hero-input:focus {
+            border-color: #0070ba;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 112, 186, 0.1);
+        }
+
+        .hero-btn {
+            width: 100%;
+            background-color: #f97316;
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-btn:hover {
+            background-color: #ea580c;
+            transform: translateY(-1px);
+        }
+
+        .hero-btn-secondary {
+            display: inline-block;
+            background-color: #f97316;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 24px;
+        }
+
+        .hero-btn-secondary:hover {
+            background-color: #ea580c;
+            transform: translateY(-1px);
+        }
+
+        .hero-footer-text {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .hero-bottom-brand {
+            margin-top: 60px;
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            font-family: 'Inter', sans-serif;
+        }
+
+        @media (max-width: 1000px) {
+            .hero-wrapper {
+                flex-direction: column;
+                text-align: center;
+                padding: 40px 24px;
+            }
+
+            .hero-content {
+                padding-right: 0;
+                margin-bottom: 40px;
+            }
+
+            .hero-card {
+                width: 100%;
+                max-width: 500px;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
     </style>
 </head>
 
 <body>
 
     <div class="container">
+
+        <!-- NEW HERO SECTION -->
+        <div class="hero-wrapper">
+            <div class="hero-content">
+                <h1 class="hero-title">Get Pre-Approved for a Spanish Mortgage in 48 Hours</h1>
+                <p class="hero-subtitle">American-focused guidance from people who've been there</p>
+
+                <button class="hero-btn-secondary"
+                    onclick="document.getElementById('simple-calc-card').scrollIntoView({behavior: 'smooth'})">
+                    Check Your Score (3 min)
+                </button>
+
+                <p class="hero-footer-text">Free assessment. No commitment.</p>
+                <div class="hero-bottom-brand">MORTGAGES MADE SIMPLE</div>
+            </div>
+
+            <div class="hero-card" id="simple-calc-card">
+                <h3>Your Eligibility Score</h3>
+                <p>See if you qualify in under 3 minutes</p>
+
+                <div class="hero-input-group">
+                    <label class="hero-label">Monthly Gross Income (USD)</label>
+                    <input type="number" id="hero-income" class="hero-input" placeholder="e.g., 4000">
+                </div>
+
+                <div class="hero-input-group">
+                    <label class="hero-label">Monthly Debt Obligations (USD)</label>
+                    <input type="number" id="hero-debts" class="hero-input" placeholder="e.g., 800">
+                </div>
+
+                <button class="hero-btn" onclick="runHeroCalc()">Calculate Your Score</button>
+            </div>
+        </div>
+
 
         <div class="page-header">
             <h1>Mortgage Score Calculator</h1>
@@ -1128,6 +1330,12 @@
             };
             ['price', 'mortgage', 'income', 'debts', 'age', 'term', 'rate'].forEach(sync);
             document.getElementById('term-hint').textContent = `max updates by age (${75 - state.age}y)`;
+
+            // Sync hero inputs
+            const hInc = document.getElementById('hero-income');
+            const hDebt = document.getElementById('hero-debts');
+            if (hInc) hInc.value = state.income;
+            if (hDebt) hDebt.value = state.debts;
         }
 
         function interact() {
@@ -1218,6 +1426,22 @@
         <div class="breakdown-row"><span>Mortgage costs</span><span>${fmtMoney(mortgageCosts)}</span></div>
         <div class="breakdown-row"><span>Total taxes & costs</span><span>${fmtMoney(totalCosts)}</span></div>`;
         }
+        function runHeroCalc() {
+            const incInput = document.getElementById('hero-income');
+            const debtInput = document.getElementById('hero-debts');
+            let inc = parseFloat(incInput.value);
+            let debts = parseFloat(debtInput.value);
+
+            if (isNaN(inc) || inc < 0) { alert("Please enter a valid monthly income."); return; }
+            if (isNaN(debts) || debts < 0) debts = 0;
+
+            state.income = inc;
+            state.debts = debts;
+            updateUI_Inputs();
+            interact();
+            document.getElementById('score-results').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
         init();
     </script>
 </body>
